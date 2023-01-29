@@ -69,10 +69,10 @@ def run(playwright: Playwright) -> None:
     page.wait_for_load_state()
     
     page.screenshot(path="screenshots/4.png")
-    # page.query_selector(".ant-space ant-space-vertical _1OdDIdGoEhOYqVK1LGkPbs").get_by_role("button").first.click() # clicks the button to resolve the screen
-    page.get_by_role("main").get_by_role("button").first.click()
-    page.wait_for_load_state()
-    page.wait_for_timeout(3*in_seconds)
+    # # page.query_selector(".ant-space ant-space-vertical _1OdDIdGoEhOYqVK1LGkPbs").get_by_role("button").first.click() # clicks the button to resolve the screen
+    # page.get_by_role("main").get_by_role("button").first.click()
+    # page.wait_for_load_state()
+    # page.wait_for_timeout(3*in_seconds)
     page.screenshot(path="screenshots/5.png")
     print("done")
 
@@ -86,12 +86,30 @@ def run(playwright: Playwright) -> None:
     # page.locator("#collapsed-alerts-list div").click()
     ########################################################################
 
-    
-    # grabs all of the data from the side bar
-    page.wait_for_load_state()
-
-    page.get_by_role("main").get_by_role("span").click()
+    page.locator('#card-alerts-list').first.first.nth(0).click() # clicks on the card alerts to open up the alert info
     page.screenshot(path="screenshots/6.png")
+    print("done2")
+    page.wait_for_load_state()
+    page.get_by_role("button").nth(2).click() # clicks next to get the next alert info
+    page.wait_for_load_state()
+    page.screenshot(path="screenshots/7.png")
+    print("done3")
+
+    # what we need to do
+    # get the words and save it to a db/set. Have var as time alert sent out for key to then break out of loop when hits that time again
+    # filter through if we have seen the alert already
+    # save the license plates to a hashset
+
+    
+    # # grabs all of the data from the side bar
+    # page.wait_for_load_state()
+    # #page.get_by_role("main").get_by_role("div").locator("._2PY_-Unzot-mgchwKKNgqk > .anticon").first.click()
+    # #page.get_by_role("main").get_by_text("Missing Person").click()
+    # page.locator('[class="_2PY_-Unzot-mgchwKKNgqk a4eoTN9WP9ad3-LhXHpuz"]').first.click()
+    # #page.click('[class=_2PY_-Unzot-mgchwKKNgqk a4eoTN9WP9ad3-LhXHpuz]')
+    # print("done2")
+    # page.wait_for_timeout(3*in_seconds)
+    # page.screenshot(path="screenshots/6.png")
 
     
     html = page.inner_html("._3hppmX6GqLF_toD4XOvBXz aLatcoPoKoAqweVTlcZId _1AEPF4RKn1ehVpDMKcErDr _1S8r8RZnqU7xI13MoBI3eJ _2T6JSna1WBLvwlkPoVN3XU")
