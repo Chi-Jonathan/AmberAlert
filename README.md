@@ -1,6 +1,4 @@
-HiHi
-
 Installs
 ```bash
-pip install playwright bs4 nltk enchant
+pip install playwright bs4 nltk pyenchant
 ```
