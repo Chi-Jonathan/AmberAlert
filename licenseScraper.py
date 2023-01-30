@@ -22,9 +22,9 @@ def run(playwright: Playwright) -> None:
     # goes the PBS warn
     page.goto("https://warn.pbs.org/") # Go to link
     page.wait_for_load_state()
-    print("Wait for 20")
+    print("Waiting for load state...")
     page.wait_for_timeout(5*in_seconds)
-    print("Done")
+    print("Navigated to https://warn.pbs.org")
 
     # # all alerts logic
     # # XPATH
@@ -59,28 +59,28 @@ def run(playwright: Playwright) -> None:
 
     # roles
     page.screenshot(path="screenshots/1.png")
-    page.get_by_role("button").first.click() # might delete the first idk
+    page.get_by_role("button").first.click() # Open sidebar
     page.wait_for_load_state()
 
     page.screenshot(path="screenshots/2.png") # change this so that it looks better T.T
     # page.query_selector(".ant-layout-sider-children").get_by_role("button").click() # gets the tree of the sidebar and clicks on the only button inside of the tree
     # page.get_by_role("button").click()
-    page.get_by_role("complementary").filter(has_text="Alert ListThere are no active alerts. Click the filter icon to view expired aler").get_by_role("button").first.click()
+    page.get_by_role("complementary").filter(has_text="Alert ListThere are no active alerts. Click the filter icon to view expired aler").get_by_role("button").first.click() # Click the filters button to change from active alerts to all alerts
 
 
     page.screenshot(path="screenshots/3.png")
     #page.query_selector(".ant-select-arrow").click().select_option("All alerts") # might need to get rid of click? dunno
     page.query_selector(".ant-select-selection-item").click()
-    page.get_by_text("All alerts").click()
+    page.get_by_text("All alerts").click() # Change alert type to all alert
     page.wait_for_load_state()
+    print("Navigated to all alerts")
     
     page.screenshot(path="screenshots/4.png")
     # # page.query_selector(".ant-space ant-space-vertical _1OdDIdGoEhOYqVK1LGkPbs").get_by_role("button").first.click() # clicks the button to resolve the screen
     # page.get_by_role("main").get_by_role("button").first.click()
     # page.wait_for_load_state()
     # page.wait_for_timeout(3*in_seconds)
-    page.screenshot(path="screenshots/5.png")
-    print("done")
+    # page.screenshot(path="screenshots/5.png")
 
 
     # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ def run(playwright: Playwright) -> None:
 
     page.locator('#card-alerts-list').first.first.nth(0).click() # clicks on the card alerts to open up the alert info
     page.screenshot(path="screenshots/6.png")
-    print("done2")
+    print("Opened alert info")
     page.wait_for_load_state()
     
     def scrape():
