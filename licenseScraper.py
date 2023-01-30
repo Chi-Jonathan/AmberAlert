@@ -1,9 +1,10 @@
 # Main Script
 from playwright.sync_api import Playwright, sync_playwright, expect
 from bs4 import BeautifulSoup
-import nltk # splitting by english words
 from enchant.checker import SpellChecker # keeping all non-english words
 from enchant.tokenize import EmailFilter, URLFilter
+import re
+import nltk # splitting by english words
 # nltk.download('punkt') # only needs to be ran once
 
 in_seconds = 1000 # aux variable to convert milli to seconds
@@ -125,23 +126,16 @@ def run(playwright: Playwright) -> None:
     wea360ch, desc, timeSentFirst = scrape()
 
 
-    spellChcker = SpellChecker("en_US", filters = [EmailFilter,URLFilter])
+    exceptions = ['WEA', 'lic', '360CH']   
     def grab_license_plate(wea360ch, desc):
         license_plate = ''
         
-        modifier = '' #' https://www.youtube.com/watch?v=vdhCzy4Ibps' # dummy code :) :) :) :) :)
-        # wea360ch = nltk.tokenize.word_tokenize(wea360ch + modifier, language='english') # use NLTK because it splits everything everything.
-        # desc = nltk.tokenize.word_tokenize(desc + modifier, language='english')
-        
-        # wea360ch = wea360ch.split()
-        # desc = desc.split()
-        
-        spellChcker.set_text(wea360ch + ' ' + desc)
-        for err in spellChcker:
-            print('BAD: ', err.word)
-        
-        # print ('SOURCE: ', wea360ch, desc)
-        
+        regex = '^(?=.*[A-Z])(?=.*\\d).+$'
+        r = re.compile(regex)
+        for word in wea360ch.split():
+            if (re.search(r, word)) and word not in exceptions and len(word) in [6,7,8]: # if the word is a license plate, aka if the word is 6-8 long (works for US), word is not an exception, and word has a number and a letter by regex
+                license_plate = re.sub(r'[^\w\s]', '', word) # strip punctuation
+        print("License Plate: " + license_plate)
         return license_plate
 
 
