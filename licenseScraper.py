@@ -103,22 +103,18 @@ def run(playwright: Playwright) -> None:
         soup = soup.get_text()
         index1 = soup.find("Sent")+4
         timeSent = soup[index1:index1+19] # time sent
-        print("Time sent: " + timeSent)
-        # print(nltk.tokenize.word_tokenize(timeSent + modifier, language='english'))
+        # print("Time sent: " + timeSent)
         index1 = soup.find("360CH EN")+8
         index2 = soup.find("90CH")-4
         if index1 != 7 and index2 != -5:
             wea360ch = soup[index1:index2] # wea360ch
-            print("WEA 360CH EN: " + wea360ch)
-            # print(nltk.tokenize.word_tokenize(wea360ch + modifier, language='english'))
+            # print("WEA 360CH EN: " + wea360ch)
         else: wea360ch = ''
         index1 = soup.find("Description EN")+14
         index2 = soup.find("ID")
         if index1 != 13 and index2 != -1:
             desc = soup[index1:index2] # description 
-            print("DESCRIPTION EN: " + desc)
-            # print(nltk.tokenize.word_tokenize(desc + modifier, language='english'))
-            # print()
+            # print("DESCRIPTION EN: " + desc)
         else:
             desc = ''
         return wea360ch, desc, timeSent
@@ -126,16 +122,34 @@ def run(playwright: Playwright) -> None:
     wea360ch, desc, timeSentFirst = scrape()
 
 
-    exceptions = ['WEA', 'lic', '360CH']   
+    exceptions = ['WEA', '360CH']
+    keywords = ['child', 'amber', 'plate', 'license', 'lic', 'reg']
+    rejects = ['tornado', 'weather']
     def grab_license_plate(wea360ch, desc):
         license_plate = ''
         
         regex = '^(?=.*[A-Z])(?=.*\\d).+$'
         r = re.compile(regex)
-        for word in wea360ch.split():
+        # word_list = wea360ch.split()
+        word_list = nltk.tokenize.word_tokenize((wea360ch + desc), language='english')
+        # print(word_list)
+        
+        valid = False
+        for word in word_list: # validate word_list
+            if word.casefold() in keywords:
+                valid = True
+                print('valid - contains: ', word)
+                break
+            if word.casefold() in rejects:
+                print('rejected - contains: ', word)
+                break
+        if not valid: return ''
+        
+        for word in word_list:
             if (re.search(r, word)) and word not in exceptions and len(word) in [6,7,8]: # if the word is a license plate, aka if the word is 6-8 long (works for US), word is not an exception, and word has a number and a letter by regex
                 license_plate = re.sub(r'[^\w\s]', '', word) # strip punctuation
         print("License Plate: " + license_plate)
+        print(wea360ch, desc)
         return license_plate
 
 
