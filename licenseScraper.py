@@ -1,6 +1,10 @@
 # Main Script
 from playwright.sync_api import Playwright, sync_playwright, expect
 from bs4 import BeautifulSoup
+import nltk # splitting by english words
+import enchant # keeping all non-english words
+# nltk.download('punkt')
+# nltk.download()
 
 in_seconds = 1000 # aux variable to convert milli to seconds
 
@@ -90,13 +94,63 @@ def run(playwright: Playwright) -> None:
     page.screenshot(path="screenshots/6.png")
     print("done2")
     page.wait_for_load_state()
-    page.get_by_role("button").nth(2).click() # clicks next to get the next alert info
-    page.wait_for_load_state()
-    page.screenshot(path="screenshots/7.png")
-    print("done3")
+    dct = enchant.Dict()
+    
+    def scrape():
+        html = page.inner_html("._2T6JSna1WBLvwlkPoVN3XU")
+        soup = BeautifulSoup(html, "html.parser")
+        soup = soup.get_text()
+        index1 = soup.find("Sent")+4
+        timeSent = soup[index1:index1+19] # time sent
+        # print("Time sent: " + timeSent)
+        # print(nltk.tokenize.word_tokenize(timeSent + modifier, language='english'))
+        index1 = soup.find("360CH EN")+8
+        index2 = soup.find("90CH")-4
+        if index1 != 7 and index2 != -5:
+            wea360ch = soup[index1:index2] # wea360ch
+            # print("WEA 360CH EN: " + wea360ch)
+            # print(nltk.tokenize.word_tokenize(wea360ch + modifier, language='english'))
+        else: wea360ch = ''
+        index1 = soup.find("Description EN")+14
+        index2 = soup.find("ID")
+        if index1 != 13 and index2 != -1:
+            desc = soup[index1:index2] # description 
+            # print("DESCRIPTION EN: " + desc)
+            # print(nltk.tokenize.word_tokenize(desc + modifier, language='english'))
+            # print()
+        else:
+            desc = ''
+        return wea360ch, desc, timeSent
+
+    wea360ch, desc, timeSentFirst = scrape()
+
+
+    def grab_license_plate(wea360ch, desc):
+        license_plate = ''
+        
+        modifier = '' #' https://www.youtube.com/watch?v=vdhCzy4Ibps' # dummy code :) :) :) :) :)
+        nltk.tokenize.word_tokenize(wea360ch + modifier, language='english')
+        nltk.tokenize.word_tokenize(desc + modifier, language='english')
+
+        print(wea360ch, desc, timeSentFirst)
+        return license_plate
+
+
+    kidnappings.append((wea360ch, desc))
+    timeSent = ''
+    print("Time Sent First: " + timeSentFirst)
+    while timeSentFirst != timeSent:
+        page.get_by_role("button").nth(2).click() # clicks next to get the next alert info
+        page.wait_for_load_state()
+        page.screenshot(path="screenshots/7.png")
+        print()
+        wea360ch, desc, timeSent = scrape()
+        kidnappings.append((wea360ch, desc))
+
+        
 
     # what we need to do
-    # get the words and save it to a db/set. Have var as time alert sent out for key to then break out of loop when hits that time again
+    # get the license plate and save it to a db/set. Have var as time alert sent out for key to then break out of loop when hits that time again
     # filter through if we have seen the alert already
     # save the license plates to a hashset
 
@@ -112,15 +166,15 @@ def run(playwright: Playwright) -> None:
     # page.screenshot(path="screenshots/6.png")
 
     
-    html = page.inner_html("._3hppmX6GqLF_toD4XOvBXz aLatcoPoKoAqweVTlcZId _1AEPF4RKn1ehVpDMKcErDr _1S8r8RZnqU7xI13MoBI3eJ _2T6JSna1WBLvwlkPoVN3XU")
-    soup = BeautifulSoup(html, 'html.parser')
-    print("souped up bitch")
-    soup = soup.find_all('div').text
-    if "child" or "amber" or " licence " or " reg " or " lic " in soup:
-        kidnappings.append(soup)
-        # after yoinking data from side bar put it into the database if it matches the above conditions (in the if statement)
-    context.close()
-    browser.close()
+    
+    # soup = BeautifulSoup(html, 'html.parser')
+    # print("souped up bitch")
+    # soup = soup.find_all('div').text
+    # if "child" or "amber" or " licence " or " reg " or " lic " in soup:
+    #     kidnappings.append(soup)
+    #     # after yoinking data from side bar put it into the database if it matches the above conditions (in the if statement)
+    # context.close()
+    # browser.close()
 
       
     
