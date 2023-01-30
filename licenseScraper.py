@@ -1,11 +1,8 @@
 # Main Script
 from playwright.sync_api import Playwright, sync_playwright, expect
 from bs4 import BeautifulSoup
-from enchant.checker import SpellChecker # keeping all non-english words
-from enchant.tokenize import EmailFilter, URLFilter
 import re
 import nltk # splitting by english words
-# nltk.download('punkt') # only needs to be ran once
 
 in_seconds = 1000 # aux variable to convert milli to seconds
 
