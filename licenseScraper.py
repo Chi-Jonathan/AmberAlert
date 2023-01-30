@@ -2,19 +2,20 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
 from bs4 import BeautifulSoup
 import nltk # splitting by english words
-import enchant # keeping all non-english words
-# nltk.download('punkt')
-# nltk.download()
+from enchant.checker import SpellChecker # keeping all non-english words
+from enchant.tokenize import EmailFilter, URLFilter
+# nltk.download('punkt') # only needs to be ran once
 
 in_seconds = 1000 # aux variable to convert milli to seconds
 
 def run(playwright: Playwright) -> None:
     ### Joining
-    kidnappings = []
+    kidnappings = set()
 
     # browser = playwright.chromium.launch(headless=False, slow_mo=5000)
     browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context(record_video_dir="videos/")
+    # context = browser.new_context(record_video_dir="videos/")
+    context = browser.new_context()
     page = context.new_page()
     # while True:
     # goes the PBS warn
@@ -94,7 +95,6 @@ def run(playwright: Playwright) -> None:
     page.screenshot(path="screenshots/6.png")
     print("done2")
     page.wait_for_load_state()
-    dct = enchant.Dict()
     
     def scrape():
         html = page.inner_html("._2T6JSna1WBLvwlkPoVN3XU")
@@ -102,20 +102,20 @@ def run(playwright: Playwright) -> None:
         soup = soup.get_text()
         index1 = soup.find("Sent")+4
         timeSent = soup[index1:index1+19] # time sent
-        # print("Time sent: " + timeSent)
+        print("Time sent: " + timeSent)
         # print(nltk.tokenize.word_tokenize(timeSent + modifier, language='english'))
         index1 = soup.find("360CH EN")+8
         index2 = soup.find("90CH")-4
         if index1 != 7 and index2 != -5:
             wea360ch = soup[index1:index2] # wea360ch
-            # print("WEA 360CH EN: " + wea360ch)
+            print("WEA 360CH EN: " + wea360ch)
             # print(nltk.tokenize.word_tokenize(wea360ch + modifier, language='english'))
         else: wea360ch = ''
         index1 = soup.find("Description EN")+14
         index2 = soup.find("ID")
         if index1 != 13 and index2 != -1:
             desc = soup[index1:index2] # description 
-            # print("DESCRIPTION EN: " + desc)
+            print("DESCRIPTION EN: " + desc)
             # print(nltk.tokenize.word_tokenize(desc + modifier, language='english'))
             # print()
         else:
@@ -125,18 +125,27 @@ def run(playwright: Playwright) -> None:
     wea360ch, desc, timeSentFirst = scrape()
 
 
+    spellChcker = SpellChecker("en_US", filters = [EmailFilter,URLFilter])
     def grab_license_plate(wea360ch, desc):
         license_plate = ''
         
         modifier = '' #' https://www.youtube.com/watch?v=vdhCzy4Ibps' # dummy code :) :) :) :) :)
-        nltk.tokenize.word_tokenize(wea360ch + modifier, language='english')
-        nltk.tokenize.word_tokenize(desc + modifier, language='english')
-
-        print(wea360ch, desc, timeSentFirst)
+        # wea360ch = nltk.tokenize.word_tokenize(wea360ch + modifier, language='english') # use NLTK because it splits everything everything.
+        # desc = nltk.tokenize.word_tokenize(desc + modifier, language='english')
+        
+        # wea360ch = wea360ch.split()
+        # desc = desc.split()
+        
+        spellChcker.set_text(wea360ch + ' ' + desc)
+        for err in spellChcker:
+            print('BAD: ', err.word)
+        
+        # print ('SOURCE: ', wea360ch, desc)
+        
         return license_plate
 
 
-    kidnappings.append((wea360ch, desc))
+    kidnappings.add(grab_license_plate(wea360ch, desc))
     timeSent = ''
     print("Time Sent First: " + timeSentFirst)
     while timeSentFirst != timeSent:
@@ -145,7 +154,8 @@ def run(playwright: Playwright) -> None:
         page.screenshot(path="screenshots/7.png")
         print()
         wea360ch, desc, timeSent = scrape()
-        kidnappings.append((wea360ch, desc))
+        kidnappings.add(grab_license_plate(wea360ch, desc))
+        page.wait_for_timeout(1*in_seconds) # prevent rate limiting. scrape only one alert per second
 
         
 
