@@ -19,29 +19,29 @@ def run(playwright: Playwright) -> None:
     # goes to the PBS warn
     page.goto("https://warn.pbs.org/") # Go to link
     page.wait_for_load_state()
-    print("Waiting for load state...")
+    # print("Waiting for load state...")
     page.wait_for_timeout(5*in_seconds)
-    print("Navigated to https://warn.pbs.org")
+    # print("Navigated to https://warn.pbs.org")
 
     # roles
-    page.screenshot(path="screenshots/1.png")
+    # page.screenshot(path="screenshots/1.png")
     page.get_by_role("button").first.click() # Open sidebar
     page.wait_for_load_state()
 
-    page.screenshot(path="screenshots/2.png") # change this so that it looks better T.T
+    # # page.screenshot(path="screenshots/2.png") # change this so that it looks better T.T
     page.get_by_role("complementary").filter(has_text="Alert ListThere are no active alerts. Click the filter icon to view expired aler").get_by_role("button").first.click() # Click the filters button to change from active alerts to all alerts
 
 
-    page.screenshot(path="screenshots/3.png")
+    # # page.screenshot(path="screenshots/3.png")
     page.query_selector(".ant-select-selection-item").click()
     page.get_by_text("All alerts").click() # Change alert type to all alert
     page.wait_for_load_state()
-    print("Navigated to all alerts")
-    page.screenshot(path="screenshots/4.png")
+    # print("Navigated to all alerts")
+    # # page.screenshot(path="screenshots/4.png")
 
     page.locator('#card-alerts-list').first.first.nth(0).click() # clicks on the card alerts to open up the alert info
-    page.screenshot(path="screenshots/6.png")
-    print("Opened alert info")
+    # # page.screenshot(path="screenshots/6.png")
+    # print("Opened alert info")
     page.wait_for_load_state()
     
     def scrape():
@@ -81,29 +81,29 @@ def run(playwright: Playwright) -> None:
         for word in word_list: # validate word_list
             if word.casefold() in keywords:
                 valid = True
-                print('valid - contains: ', word)
+                # print('valid - contains: ', word)
                 break
             if word.casefold() in rejects:
-                print('rejected - contains: ', word)
+                # print('rejected - contains: ', word)
                 break
         if not valid: return ''
         
         for word in word_list:
             if (re.search(r, word)) and word not in exceptions and len(word) in [6,7,8]: # if the word is a license plate, aka if the word is 6-8 long (works for US), word is not an exception, and word has a number and a letter by regex
                 license_plate = re.sub(r'[^\w\s]', '', word) # strip punctuation
-        print("License Plate: " + license_plate)
-        # print(wea360ch, desc)
+        # print("License Plate: " + license_plate)
+        print(wea360ch, desc)
         return license_plate
 
 
     kidnappings.add(grab_license_plate(wea360ch, desc))
     timeSent = ''
-    print("Time Sent First: " + timeSentFirst)
+    # print("Time Sent First: " + timeSentFirst)
     while timeSentFirst != timeSent:
         page.get_by_role("button").nth(2).click() # clicks next to get the next alert info
         page.wait_for_load_state()
-        page.screenshot(path="screenshots/7.png")
-        print()
+        # # page.screenshot(path="screenshots/7.png")
+        # print()
         wea360ch, desc, timeSent = scrape()
         kidnappings.add(grab_license_plate(wea360ch, desc))
         page.wait_for_timeout(1*in_seconds) # prevent rate limiting. scrape only one alert per second
